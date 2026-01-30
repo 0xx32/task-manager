@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ListTodo } from 'lucide-vue-next'
+import { ListTodo, Plus } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 import { pluralize } from '@/common/helpers/pluralize'
@@ -33,7 +33,10 @@ const boardInfo = computed(() => ({
       </h2>
 
       <CreateTaskModal>
-        <Button>Новая задача</Button>
+        <Button>
+          <Plus />
+          Новая задача
+        </Button>
       </CreateTaskModal>
     </div>
 
@@ -46,6 +49,7 @@ const boardInfo = computed(() => ({
         v-bind="task"
         @delete-task="tasksStore.deleteTask"
         @update-task="tasksStore.updateTask"
+        @toggle-status="tasksStore.toggleTaskStatus"
       />
     </div>
     <Item v-else variant="outline" class="flex-col rounded-2xl border-dashed py-20 text-slate-400">

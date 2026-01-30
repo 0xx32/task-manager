@@ -1,6 +1,6 @@
 export interface Task {
   description?: string
-  expiredDate: Date
+  expiredDate?: Date
   id: string
   priority: 'HIGH' | 'LOW' | 'MEDIUM'
   status: 'DONE' | 'IN_PROGRESS' | 'TODO'

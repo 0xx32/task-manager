@@ -13,6 +13,8 @@ export const useTasksStore = defineStore('tasks', () => {
     title: Task['title']
     description: Task['description']
     priority: Task['priority']
+    expiredDate?: Task['expiredDate']
+    tags?: Task['tags']
   }) => {
     tasks.value.push({
       id: crypto.randomUUID(),
@@ -20,8 +22,8 @@ export const useTasksStore = defineStore('tasks', () => {
       status: 'TODO',
       description: task.description,
       priority: task.priority,
-      expiredDate: new Date('2026-01-14'),
-      tags: [],
+      expiredDate: task.expiredDate,
+      tags: [...(task.tags ?? [])],
     })
   }
 
@@ -31,10 +33,26 @@ export const useTasksStore = defineStore('tasks', () => {
 
   const updateTask = (id: Task['id']) => {}
 
+  const toggleTaskStatus = (id: Task['id']) => {
+    const task = tasks.value.find((task) => task.id === id)
+    if (!task) {
+      return new Error('Task not found')
+    }
+
+    if (task.status === 'TODO') {
+      task.status = 'IN_PROGRESS'
+    } else if (task.status === 'IN_PROGRESS') {
+      task.status = 'DONE'
+    } else if (task.status === 'DONE') {
+      task.status = 'IN_PROGRESS'
+    }
+  }
+
   return {
     tasks,
     deleteTask,
     updateTask,
     createTask,
+    toggleTaskStatus,
   }
 })

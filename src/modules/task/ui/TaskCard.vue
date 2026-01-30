@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Task } from '../types'
 
-import { CalendarDays, CircleCheckBig } from 'lucide-vue-next'
+import { CalendarDays, CircleCheckBig, LoaderPinwheel } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 import { Badge } from '@/common/ui/badge'
@@ -18,12 +18,12 @@ interface TaskCardProps extends Task {}
 
 const { id, title, description, status, tags, priority, expiredDate } = defineProps<TaskCardProps>()
 
-defineEmits<{
+const emits = defineEmits<{
   deleteTask: [id: Task['id']]
   updateTask: [id: Task['id']]
+  toggleStatus: [id: Task['id'], status: Task['status']]
 }>()
 
-const taskInDone = computed(() => status === 'DONE')
 const isOverdue = computed(() => expiredDate < new Date() && status !== 'DONE')
 
 const PRIORITY_COLORS = {
@@ -36,6 +36,20 @@ const STATUS_COLORS = {
   IN_PROGRESS: 'bg-indigo-100 text-indigo-600',
   DONE: 'bg-indigo-600 text-white',
 }
+
+const toggleStatus = () => {
+  let nextStatus = 'IN_PROGRESS' as Task['status']
+
+  if (status === 'TODO') {
+    nextStatus = 'IN_PROGRESS'
+  } else if (status === 'IN_PROGRESS') {
+    nextStatus = 'DONE'
+  } else if (status === 'DONE') {
+    nextStatus = 'IN_PROGRESS'
+  }
+
+  emits('toggleStatus', id, nextStatus)
+}
 </script>
 
 <template>
@@ -47,15 +61,17 @@ const STATUS_COLORS = {
             <button
               class="mt-1 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full border-2"
               :class="STATUS_COLORS[status]"
+              @click="toggleStatus"
             >
-              <CircleCheckBig v-if="taskInDone" />
+              <CircleCheckBig v-if="status === 'DONE'" />
+              <LoaderPinwheel v-if="status === 'IN_PROGRESS'" />
             </button>
 
             <div class="min-w-0 flex-1">
               <h3
                 class="truncate font-semibold"
                 :class="{
-                  'text-slate-400 line-through': taskInDone,
+                  'text-slate-400 line-through': status === 'DONE',
                 }"
               >
                 {{ title }}

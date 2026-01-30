@@ -5,6 +5,7 @@
     "": {
       "name": "task-manager",
       "dependencies": {
+        "@internationalized/date": "^3.10.1",
         "@tailwindcss/vite": "^4.1.18",
         "@vee-validate/valibot": "^4.15.1",
         "@vueuse/core": "^14.1.0",
