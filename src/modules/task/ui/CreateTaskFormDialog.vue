@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Task } from '../types'
-
+import { toTypedSchema } from '@vee-validate/valibot'
+import { useForm } from 'vee-validate'
 import { ref } from 'vue'
 
 import { Button } from '@/common/ui/button'
@@ -14,38 +14,56 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/common/ui/dialog'
-import { Field, FieldGroup, FieldLabel, FieldSeparator, FieldSet } from '@/common/ui/field'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+  FieldSet,
+} from '@/common/ui/field'
 import { Input } from '@/common/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/common/ui/radio-group'
 import { Textarea } from '@/common/ui/textarea'
 
+import { createTaskFormSchema } from '../schemas/createTaskForm'
 import { useTasksStore } from '../stores/tasks'
 
-const isOpenDialog = ref(false)
+const isShowDialog = ref(false)
+
 const tasksStore = useTasksStore()
 
-//test
-const formState = ref({
-  title: '',
-  description: '',
-  priority: 'MEDIUM',
+const { errors, defineField, handleSubmit, resetForm } = useForm({
+  initialValues: {
+    title: '',
+    description: '',
+    priority: 'MEDIUM',
+  },
+  validationSchema: toTypedSchema(createTaskFormSchema),
 })
 
-const onSubmit = () => {
-  if (formState.value.title === '') return
+const [title, titleAttrs] = defineField('title')
+const [description, descriptionAttrs] = defineField('description')
+const [priority, priorityAttrs] = defineField('priority')
 
+const onSubmit = handleSubmit((values) => {
   tasksStore.createTask({
-    title: formState.value.title,
-    description: formState.value.description,
-    priority: formState.value.priority as Task['priority'],
+    title: values.title,
+    description: values.description,
+    priority: values.priority,
   })
 
-  isOpenDialog.value = false
+  isShowDialog.value = false
+})
+
+const onToggleDialog = () => {
+  isShowDialog.value = !isShowDialog.value
+  resetForm()
 }
 </script>
 
 <template>
-  <Dialog :open="isOpenDialog" @update:open="() => (isOpenDialog = !isOpenDialog)">
+  <Dialog :open="isShowDialog" @update:open="onToggleDialog">
     <DialogTrigger as-child><slot /></DialogTrigger>
     <DialogContent>
       <DialogHeader>
@@ -62,22 +80,33 @@ const onSubmit = () => {
               <FieldLabel for="title" class="text-xs uppercase"> Заголовок </FieldLabel>
               <Input
                 id="title"
-                v-model="formState.title"
+                v-model="title"
+                v-bind="titleAttrs"
                 placeholder="e.g. Дизайн целевой страницы"
+                :aria-invalid="!!errors.title"
               />
+              <FieldError>{{ errors.title }}</FieldError>
             </Field>
             <Field>
               <FieldLabel for="description" class="text-xs uppercase"> Описание </FieldLabel>
               <Textarea
                 id="description"
-                v-model="formState.description"
+                v-model="description"
+                v-bind="descriptionAttrs"
                 class="h-24 resize-none"
                 placeholder="Добавьте подробную информацию о задаче..."
+                :aria-invalid="!!errors.description"
               />
+              <FieldError>{{ errors.description }}</FieldError>
             </Field>
             <FieldGroup>
               <FieldLabel class="text-xs uppercase">Приоритет</FieldLabel>
-              <RadioGroup v-model="formState.priority" default-value="MEDIUM" class="flex">
+              <RadioGroup
+                v-model="priority"
+                v-bind="priorityAttrs"
+                default-value="MEDIUM"
+                class="flex"
+              >
                 <Field orientation="horizontal" class="w-auto">
                   <RadioGroupItem id="priority-low" value="LOW" />
                   <FieldLabel for="priority-low" class="text-xs font-normal"> LOW </FieldLabel>

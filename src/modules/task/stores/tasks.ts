@@ -3,26 +3,7 @@ import type { Task } from '../types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-const MOCK_TASKS = [
-  {
-    id: 'awdadawd',
-    title: 'Task 1',
-    description: 'Description 1',
-    status: 'DONE',
-    tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-    priority: 'HIGH',
-    expiredDate: new Date('2026-01-14'),
-  },
-  {
-    id: 'sawdadawd',
-    title: 'Task 1',
-    description: 'Description 1',
-    status: 'DONE',
-    tags: ['Tag 1', 'Tag 2', 'Tag 3'],
-    priority: 'HIGH',
-    expiredDate: new Date('2026-01-14'),
-  },
-] satisfies Task[]
+const MOCK_TASKS = [] satisfies Task[]
 
 export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>(MOCK_TASKS)
@@ -34,7 +15,7 @@ export const useTasksStore = defineStore('tasks', () => {
     priority: Task['priority']
   }) => {
     tasks.value.push({
-      id: Math.random().toString(),
+      id: crypto.randomUUID(),
       title: task.title,
       status: 'TODO',
       description: task.description,
