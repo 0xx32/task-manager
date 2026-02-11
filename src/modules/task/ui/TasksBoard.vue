@@ -14,7 +14,7 @@ import TaskCard from './TaskCard.vue'
 const tasksStore = useTasksStore()
 
 const boardInfo = computed(() => ({
-  taskCount: tasksStore.tasks.length,
+  taskCount: tasksStore.filteredTasks.length,
   title: pluralize(tasksStore.tasks.length, {
     zero: 'задач',
     one: 'задача',
@@ -44,7 +44,7 @@ const boardInfo = computed(() => ({
 
     <div v-if="!!boardInfo.taskCount" className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <TaskCard
-        v-for="task in tasksStore.tasks"
+        v-for="task in tasksStore.filteredTasks"
         :key="task.id"
         v-bind="task"
         @delete-task="tasksStore.deleteTask"

@@ -1,13 +1,46 @@
 import type { Task } from '../types'
 
+import { useLocalStorage } from '@vueuse/core'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
-const MOCK_TASKS = [] satisfies Task[]
+const MOCK_TASKS = [] as Task[]
+
+type StatusFilter = 'ALL' | Task['status']
+type PriorityFilter = 'ALL' | Task['priority']
 
 export const useTasksStore = defineStore('tasks', () => {
-  const tasks = ref<Task[]>(MOCK_TASKS)
+  const tasks = useLocalStorage('pinia/tasks', MOCK_TASKS, {
+    listenToStorageChanges: true,
+    serializer: {
+      read: (v: string) =>
+        JSON.parse(v, (key, value) => {
+          if (key === 'expiredDate' && value) return new Date(value)
+          return value
+        }),
+      write: (v: any) => JSON.stringify(v),
+    },
+  })
 
+  const activeStatusFilter = ref<StatusFilter>('ALL')
+  const activePriorityFilter = ref<PriorityFilter>('ALL')
+
+  const filteredTasks = computed(() => {
+    if (activeStatusFilter.value === 'ALL' && activePriorityFilter.value === 'ALL') {
+      return tasks.value
+    }
+
+    return tasks.value.filter((task) => {
+      return (
+        (activeStatusFilter.value === 'ALL' || task.status === activeStatusFilter.value) &&
+        (activePriorityFilter.value === 'ALL' || task.priority === activePriorityFilter.value)
+      )
+    })
+  })
+
+  watch(tasks, (value) => {
+    localStorage.value = value
+  })
   //TODO: Переделать!!! (сделано для теста)
   const createTask = (task: {
     title: Task['title']
@@ -50,6 +83,9 @@ export const useTasksStore = defineStore('tasks', () => {
 
   return {
     tasks,
+    filteredTasks,
+    activeStatusFilter,
+    activePriorityFilter,
     deleteTask,
     updateTask,
     createTask,

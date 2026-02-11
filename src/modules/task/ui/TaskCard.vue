@@ -24,7 +24,10 @@ const emits = defineEmits<{
   toggleStatus: [id: Task['id'], status: Task['status']]
 }>()
 
-const isOverdue = computed(() => expiredDate < new Date() && status !== 'DONE')
+const isOverdue = computed(() => {
+  if (!expiredDate) return false
+  return expiredDate < new Date() && status !== 'DONE'
+})
 
 const PRIORITY_COLORS = {
   LOW: 'bg-emerald-50 text-emerald-700 border-emerald-100',
@@ -55,7 +58,7 @@ const toggleStatus = () => {
 <template>
   <ContextMenu>
     <ContextMenuTrigger>
-      <Item variant="outline" class="block">
+      <Item variant="outline" class="flex flex-col items-start h-full">
         <div class="flex items-start justify-between gap-3">
           <div class="flex min-w-0 flex-1 items-start gap-3">
             <button
@@ -76,14 +79,14 @@ const toggleStatus = () => {
               >
                 {{ title }}
               </h3>
-              <p v-if="!!description" class="mt-0.5 line-clamp-1 text-sm">
+              <p class="mt-0.5 line-clamp-1 text-xs ">
                 {{ description }}
               </p>
             </div>
           </div>
         </div>
 
-        <div class="mt-4 flex flex-wrap items-center gap-3">
+        <div class="mt-auto flex flex-wrap items-center gap-3">
           <Badge
             variant="default"
             class="text-[10px] font-bold uppercase"
@@ -93,6 +96,7 @@ const toggleStatus = () => {
           </Badge>
 
           <div
+            v-if="!!expiredDate"
             class="flex items-center gap-1.5 text-xs font-medium"
             :class="{
               'text-rose-600': isOverdue,
@@ -100,7 +104,7 @@ const toggleStatus = () => {
           >
             <CalendarDays :size="14" />
 
-            {{ expiredDate.toLocaleDateString() }}
+            {{ expiredDate?.toLocaleDateString() }}
           </div>
 
           <Badge
