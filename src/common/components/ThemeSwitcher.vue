@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useColorMode } from '@vueuse/core'
 
-import { Switch } from '../ui'
+import Switch from '../ui/switch/Switch.vue';
+
 
 // Pass { disableTransition: false } to enable transitions
 const mode = useColorMode()

@@ -10,13 +10,13 @@ type StatusFilter = 'ALL' | Task['status']
 type PriorityFilter = 'ALL' | Task['priority']
 
 export const useTasksStore = defineStore('tasks', () => {
-  const tasks = useLocalStorage('pinia/tasks', MOCK_TASKS, {
+  const tasks = useLocalStorage<Task[]>('pinia/tasks', MOCK_TASKS, {
     listenToStorageChanges: true,
     serializer: {
       read: (v: string) =>
         JSON.parse(v, (key, value) => {
           if (key === 'expiredDate' && value) return new Date(value)
-          return value
+          return value 
         }),
       write: (v: any) => JSON.stringify(v),
     },
@@ -64,7 +64,7 @@ export const useTasksStore = defineStore('tasks', () => {
     tasks.value = tasks.value.filter((task) => task.id !== id)
   }
 
-  const updateTask = (id: Task['id']) => {}
+  const updateTask = () => {}
 
   const toggleTaskStatus = (id: Task['id']) => {
     const task = tasks.value.find((task) => task.id === id)
